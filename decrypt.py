@@ -28,7 +28,9 @@ def decryptFromFile(userInfo):
 
     tag = inFile.read(16)
     
-    print(decryptedData)
+    stringData = decryptedData.decode()
+    bankDetails = stringData.split(",")
+    bankDetails = [int(x) for x in bankDetails]
 
     try:
         cipher.verify(tag)
@@ -41,9 +43,12 @@ def decryptFromFile(userInfo):
 
     inFile.close()
     # out_file.close()
+    return bankDetails
 
 # Usage
 # from decrypt import decryptFromFile
 
-uinfo = ["Chase", "jxk10000", "SuperSecRetPassWord"]
-decryptFromFile(uinfo)
+# uinfo = ["Chase", "jxk10000", "SuperSecRetPassWord"]
+# bankAcc, ssn = decryptFromFile(uinfo)
+# print(bankAcc)
+# print(ssn)
