@@ -2,25 +2,34 @@ from Crypto.Random import get_random_bytes
 from Crypto.Cipher import AES
 from Crypto.Protocol.KDF import scrypt
 
+def encryptToFile(userInfo, bankDetails):
+    outFile = open(userInfo[1] + '.encrypted', 'wb')
+    
+    salt = get_random_bytes(32)
+    password = userInfo[2]
 
-user_info = ["Chase", "jxk10000", "SuperSecRetPassWord"]
-ssn = 123456789
+    key = scrypt(password, salt, key_len = 32, N = 2**18, r = 8, p = 1)
+    outFile.write(salt)
 
-out_file = open(user_info[1] + '.encrypted', 'wb')
+    cipher = AES.new(key, AES.MODE_GCM)
+    outFile.write(cipher.nonce)
 
-salt = get_random_bytes(32)
-password = user_info[2]
+    data = str(bankDetails[0]) + ", " + str(bankDetails[1])
 
-key = scrypt(password, salt, key_len = 32, N = 2**18, r = 8, p = 1)
-out_file.write(salt)
+    encrypted_data = cipher.encrypt(data.encode('utf-8'))
+    outFile.write(encrypted_data)
 
-cipher = AES.new(key, AES.MODE_GCM)
-out_file.write(cipher.nonce)
+    tag = cipher.digest()
+    outFile.write(tag)
 
-encrypted_data = cipher.encrypt(str(ssn).encode('utf-8'))
-out_file.write(encrypted_data)
+    outFile.close()
 
-tag = cipher.digest()
-out_file.write(tag)
+    return (key, tag)
 
-out_file.close()
+# Usage
+# from encrypt import encryptToFile
+uinfo = ["Chase", "jxk10000", "SuperSecRetPassWord"]
+bdetails = [1110006668, 123456789]
+key, tag = encryptToFile(uinfo, bdetails)
+print(key)
+print(tag)
