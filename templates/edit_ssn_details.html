@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="{{url_for('static', filename='css/edit_details.css')}}">
+    <style>
+        .center {
+            padding: 70px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    {% include "navbar.html"%}
+    <div class="center">
+        <h2>Edit SSN</h2>
+
+        <form>
+            <input type="text" id="ssn" name="ssn" value="123-456-789">
+            <br>
+            <br>
+            <input type="submit" name="submit">
+        </form>
+    </div>
+
+
+
+</body>
+
+</html>

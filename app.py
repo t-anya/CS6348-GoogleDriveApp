@@ -5,11 +5,15 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return "Login Page"
+    #return "Login Page"
+    return render_template('edit.html')
 
 @app.route('/edit_bank')
 def edit_bank():
     #todo
+    #access file -> decrypt data
+    bank_data = "123456"
+    
     return render_template('edit_bank_details.html')
 
 @app.route('/edit_ssn')
