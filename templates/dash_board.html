@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/dash_board.css')}}">
+    <title>Dash Board</title>
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous"> -->
+</head>
+
+<body>
+    {% include "navbar.html"%}
+    <br />
+
+    <div align="center">
+
+        <h3>Dash Board</h3>
+
+        <div class="row1 centered">
+            <div>
+                <a href="{{url_for('new_details')}}">
+                    <button class="btn">Create New</button>
+                </a>
+            </div>
+            <div>
+                <a href="{{url_for('edit')}}">
+                    <button class="btn">Modify</button>
+                </a>
+            </div>
+            <div class="passBtn">
+                <a href="{{url_for('password_change')}}">
+                    <button class="  btn">Password Change</button>
+                </a>
+                
+            </div>
+          </div>
+
+          <div class="row2 centered">
+            <div>
+              <button class="btn">Encryption</button>
+            </div>
+            <div>
+              <button class="btn">Secret Sharing</button>
+            </div>
+            <div>
+              <Link to="/logIn">
+                <button class="btn" onClick={logOut}>
+                  SignOut
+                </button>
+              </Link>
+            </div>
+          </div>
+
+    </div>
+    <br>
+    <br>
+</body>
+
+</html>
