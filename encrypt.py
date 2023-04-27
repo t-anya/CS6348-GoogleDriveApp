@@ -28,8 +28,8 @@ def encryptToFile(userInfo, bankDetails):
 
 # Usage
 # from encrypt import encryptToFile
-uinfo = ["Chase", "jxk10000", "SuperSecRetPassWord"]
-bdetails = [1110006668, 123456789]
-key, tag = encryptToFile(uinfo, bdetails)
-print(key)
-print(tag)
+# uinfo = ["Chase", "jxk10000", "SuperSecRetPassWord"]
+# bdetails = [1110006668, 123456789]
+# key, tag = encryptToFile(uinfo, bdetails)
+# print(key)
+# print(tag)
