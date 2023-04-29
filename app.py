@@ -1,6 +1,5 @@
-from curses import flash
 import json
-from flask import Flask,render_template,session,redirect,request
+from flask import Flask,render_template,session,redirect,request,flash
 from decrypt import decryptAll
 from encrypt import encryptToFile
 
@@ -13,7 +12,10 @@ def home():
     #todo 
     session["net_id"] = "jxk10000"
     session["user_name"] = "Chase"
-    #return "Login Page"
+   
+
+    #todo - add support for flash msg
+
     return render_template('edit.html')
 
 @app.route('/edit_bank')
@@ -58,6 +60,8 @@ def edit_all():
 
     decryptedVal = decryptAll(uinfo)
     if decryptedVal == 0 :
+        #todo -add flash support
+        flash("File is modified", "info")
         return redirect('/')
     else: 
         session["edit_all_dec_val_bank"] = decryptedVal[0]
@@ -75,7 +79,9 @@ def write_to_file():
         pwd = "SuperSecRetPassWord"
         uinfo = [session["user_name"],session["net_id"],pwd]
         encryptToFile(uinfo, bdetails)
-        flash("File edited!")
+
+        flash("File edited!", "info")
+
 
     return redirect('/')
 

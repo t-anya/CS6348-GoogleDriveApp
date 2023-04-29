@@ -15,9 +15,6 @@
     {% include "navbar.html"%}
     {% set user_bank_acc = session["edit_all_dec_val_bank"] %}
     {% set user_ssn = session["edit_all_dec_val_ssn"] %}
-    {% print(user_ssn) %}
-
-  
 
     <div class="center">
         <form method = "post" action = "/write_to_file" >
@@ -32,9 +29,6 @@
             <input type="submit" name="submit">
         </form>
     </div>
-
-    <h1> dcsdc {{user_ssn}}</h1>
-
 </body>
 
 </html>

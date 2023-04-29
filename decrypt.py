@@ -70,7 +70,12 @@ def decryptAll(userInfo):
 
     tag = inFile.read(16)
     
-    stringData = decryptedData.decode()
+    try: 
+        stringData = decryptedData.decode()
+    
+    except Exception as e:
+        return 0
+
     bankDetails = stringData.split(",")
     bankDetails = [int(x) for x in bankDetails]
 
