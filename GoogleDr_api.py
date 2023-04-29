@@ -132,6 +132,7 @@ def delete_file(drive_service, file_id):
         print(f'An error occurred: {error}')
         
 if __name__ == '__main__':
+    '''
     # Authenticate and get the drive_service object
     drive_service = authenticate_google_drive()
     
@@ -174,3 +175,4 @@ if __name__ == '__main__':
     file_name_to_delete = "upload.txt"
     file_id_to_delete = get_file_id_by_name(drive_service, file_name_to_delete, parent_id=folder_id)
     delete_file(drive_service, file_id_to_delete)
+    '''
