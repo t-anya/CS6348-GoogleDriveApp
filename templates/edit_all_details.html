@@ -13,20 +13,27 @@
 
 <body>
     {% include "navbar.html"%}
+    {% set user_bank_acc = session["edit_all_dec_val_bank"] %}
+    {% set user_ssn = session["edit_all_dec_val_ssn"] %}
+    {% print(user_ssn) %}
+
+  
 
     <div class="center">
-        <form>
+        <form method = "post" action = "/write_to_file" >
             <h2>Edit Bank A/C Number</h2>
-            <input type="text" id="bankacc" name="bankacc" value="123">
+            <input type="text" id="bankacc" name="bankacc" value= "{{ user_bank_acc }}">
             <br>
             <br>
             <h2>Edit SSN</h2>
-            <input type="text" id="ssn" name="ssn" value="123">
+            <input type="text" id="ssn" name="ssn" value="{{ user_ssn }}">
             <br>
             <br>
             <input type="submit" name="submit">
         </form>
     </div>
+
+    <h1> dcsdc {{user_ssn}}</h1>
 
 </body>
 
