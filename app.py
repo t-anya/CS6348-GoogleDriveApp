@@ -9,10 +9,8 @@ import google.auth.transport.requests
 from encrypt import encryptToFile
 from decrypt import decryptAll,decryptFromFile
 
-# session = requests.Session()
-
 # app = Flask(__name__)
-app = Flask(__name__, template_folder='templates')
+app = Flask(__name__)
 
 app.secret_key = "googleDrive.com"
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
@@ -27,6 +25,10 @@ flow = Flow.from_client_secrets_file(
             "https://www.googleapis.com/auth/userinfo.email", "openid"],
     redirect_uri="http://127.0.0.1:5000/callback")
 
+@app.route("/")
+def login():
+    #todo home?
+    return render_template('login.html')
 
 def login_required(function):
     def wrapper(*args, **kwargs):
@@ -35,16 +37,6 @@ def login_required(function):
         else:
             return function()
     return wrapper
-
-
-@app.route("/")
-def login():
-    #todo home?
-    session["net_id"] = "jxk10000"
-    session["user_name"] = "Chase"
-   
-
-    return render_template('login.html')
 
 
 @app.route('/glogin')
@@ -128,6 +120,13 @@ def password_change():
 #     # todo
 #     return render_template('password_change.html')
 
+@app.route('/edit')
+def edit():
+    #todo
+    session["net_id"] = "jxk10000"
+    session["user_name"] = "Chase"
+    return render_template('edit.html')
+
 
 @app.route('/edit_bank')
 def edit_bank():
@@ -192,7 +191,7 @@ def write_to_file():
         flash("File edited!", "info")
 
 
-    return redirect('/')
+    return redirect('/dash_board')
 
 @app.route('/write_to_file_ssn',methods=['GET', 'POST'])
 def write_to_file_ssn():
@@ -208,7 +207,7 @@ def write_to_file_ssn():
         flash("File edited!", "info")
 
 
-    return redirect('/')
+    return redirect('/dash_board')
 
 @app.route('/write_to_file_bank',methods=['GET', 'POST'])
 def write_to_file_bank():
@@ -224,10 +223,9 @@ def write_to_file_bank():
         flash("File edited!", "info")
 
 
-    return redirect('/')
+    return redirect('/dash_board')
 
 
-        
 if __name__ == '__main__':
     app.run(debug=True)
 
