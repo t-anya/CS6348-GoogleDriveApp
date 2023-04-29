@@ -92,25 +92,25 @@ def callback():
         return "An error occurred: {}".format(str(e))
 
 
-@app.route('/dash_board')
+@app.route('/dash_board', methods=['GET', 'POST'])
 @login_required
 def dash_board():
     # todo
-    try:
+    if request.method == 'POST':
+        bank_name = request.form['bank_name']
+        account_id = request.form['account_id']
+        password = request.form['password']
+        social_security = request.form['social_security']
+        # new_password = request.form['new_password']
+        print(bank_name, account_id, password, social_security)
         return render_template('dash_board.html')
-    except Exception as e:
-        print("Error in callback function:", e)
-        return "An error occurred: {}".format(str(e))
+    else:
+        return render_template('dash_board.html')
 
 
 @app.route('/new_details')
 def new_details():
-    # todo
-    try:
-        return render_template('new_details.html')
-    except Exception as e:
-        print("Error in callback function:", e)
-        return "An error occurred: {}".format(str(e))
+    return render_template('new_details.html')
 
 
 @app.route('/password_change')
