@@ -13,11 +13,12 @@
 
 <body>
     {% include "navbar.html"%}
+    {% set user_ssn = session["edit_all_dec_val_ssn"] %}
     <div class="center">
         <h2>Edit SSN</h2>
 
-        <form>
-            <input type="text" id="ssn" name="ssn" value="123-456-789">
+        <form method = "post" action = "/write_to_file_ssn">
+            <input type="text" id="ssn" name="ssn" value="{{ user_ssn }}">
             <br>
             <br>
             <input type="submit" name="submit">
