@@ -1,22 +1,136 @@
 import json
-from flask import Flask,render_template,session,redirect,request,flash
-from decrypt import decryptAll
-from encrypt import encryptToFile
+from flask import Flask,render_template
 
-app = Flask(__name__)
-app.secret_key = "key"
+
+import os
+import pathlib
+
+import requests
+from flask import Flask, session, abort, redirect, request
+from google.oauth2 import id_token
+from google_auth_oauthlib.flow import Flow
+from pip._vendor import cachecontrol
+import google.auth.transport.requests
+
+# session = requests.Session()
+
+# app = Flask(__name__)
+app = Flask(__name__, template_folder='templates')
+
+app.secret_key = "googleDrive.com"
+os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+
+GOOGLE_CLIENT_ID = "18146000347-jpbtnt2mb2o6th6piv70efobm8b47ieu.apps.googleusercontent.com"
+client_secrets_file = os.path.join(
+    pathlib.Path(__file__).parent, "client_secret.json")
+
+flow = Flow.from_client_secrets_file(
+    client_secrets_file=client_secrets_file,
+    scopes=["https://www.googleapis.com/auth/userinfo.profile",
+            "https://www.googleapis.com/auth/userinfo.email", "openid"],
+    redirect_uri="http://127.0.0.1:5000/callback")
+
+
+def login_required(function):
+    def wrapper(*args, **kwargs):
+        if "google_id" not in session:
+            return abort(401)
+        else:
+            return function()
+    return wrapper
+
 
 @app.route("/")
-def home():
-
-    #todo 
+def login():
+    #todo home?
     session["net_id"] = "jxk10000"
     session["user_name"] = "Chase"
    
 
-    #todo - add support for flash msg
+    return render_template('login.html')
 
-    return render_template('edit.html')
+
+@app.route('/glogin')
+def glogin():
+    authorization_url, state = flow.authorization_url()
+    session["state"] = state
+    return redirect(authorization_url)
+    # session["google_id"] = "test"
+    # return redirect("/dash_board")
+
+
+@app.route('/glogout')
+def glogout():
+    session.clear()
+    return redirect("/")
+
+
+@app.route("/callback")
+def callback():
+    try:
+        flow.fetch_token(authorization_response=request.url)
+
+        if not session["state"] == request.args["state"]:
+            abort(500)
+
+        credentials = flow.credentials
+        request_session = requests.Session()
+        cached_session = cachecontrol.CacheControl(request_session)
+        token_request = google.auth.transport.requests.Request(
+            session=cached_session)
+
+        id_info = id_token.verify_oauth2_token(
+            id_token=credentials._id_token,
+            request=token_request,
+            audience=GOOGLE_CLIENT_ID
+        )
+
+        session["google_id"] = id_info.get("sub")
+        session["name"] = id_info.get("name")
+        print(id_info.get("sub"))
+        print(id_info.get("name"))
+        return redirect("/dash_board")
+    except Exception as e:
+        print("Error in callback function:", e)
+        return "An error occurred: {}".format(str(e))
+
+
+@app.route('/dash_board')
+@login_required
+def dash_board():
+    # todo
+    try:
+        return render_template('dash_board.html')
+    except Exception as e:
+        print("Error in callback function:", e)
+        return "An error occurred: {}".format(str(e))
+
+
+@app.route('/new_details')
+def new_details():
+    # todo
+    try:
+        return render_template('new_details.html')
+    except Exception as e:
+        print("Error in callback function:", e)
+        return "An error occurred: {}".format(str(e))
+
+
+@app.route('/password_change')
+def password_change():
+    # todo
+    try:
+        return render_template('password_change.html')
+    except Exception as e:
+        print("Error in callback function:", e)
+        return "An error occurred: {}".format(str(e))
+
+
+# @app.route('/password_change')
+# def password_change():
+#     # todo
+#     return render_template('password_change.html')
+
 
 @app.route('/edit_bank')
 def edit_bank():
