@@ -1,16 +1,13 @@
-import json
-from flask import Flask,render_template
-
-
 import os
 import pathlib
-
 import requests
-from flask import Flask, session, abort, redirect, request
+from flask import Flask, session, abort, redirect, request, render_template, flash
 from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from pip._vendor import cachecontrol
 import google.auth.transport.requests
+from encrypt import encryptToFile
+from decrypt import decryptAll,decryptFromFile
 
 # session = requests.Session()
 
