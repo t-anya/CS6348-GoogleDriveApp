@@ -13,11 +13,12 @@
 
 <body>
   {% include "navbar.html"%}
+  {% set user_bank = session["edit_all_dec_val_bank"] %}
   <div class="center">
     <h2>Edit Bank A/C Number</h2>
 
-    <form>
-      <input type="text" id="bankacc" name="bankacc" value="123">
+    <form method = "post" action = "/write_to_file_bank">
+      <input type="text" id="bankacc" name="bankacc" value="{{ user_bank }}">
       <br>
       <br>
       <input type="submit" name="submit">
