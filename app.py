@@ -21,7 +21,7 @@ app = Flask(__name__, template_folder='templates')
 app.secret_key = "googleDrive.com"
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
-GOOGLE_CLIENT_ID = "875643125018-qpru0hfehktuaj2idou8aeedva1tojmc.apps.googleusercontent.com"
+GOOGLE_CLIENT_ID = "18146000347-jpbtnt2mb2o6th6piv70efobm8b47ieu.apps.googleusercontent.com"
 client_secrets_file = os.path.join(
     pathlib.Path(__file__).parent, "client_secret.json")
 
@@ -39,6 +39,12 @@ def login_required(function):
         else:
             return function()
     return wrapper
+
+
+@app.route("/")
+def login():
+    # todo
+    return render_template('login.html')
 
 
 @app.route('/glogin')
@@ -84,13 +90,6 @@ def callback():
     except Exception as e:
         print("Error in callback function:", e)
         return "An error occurred: {}".format(str(e))
-
-
-@app.route("/")
-def login():
-    # todo
-    return "Hello World <a href='/glogin'><button>Login</button></a>"
-    # return render_template('login.html')
 
 
 @app.route('/dash_board')
