@@ -11,6 +11,7 @@ def generateKey(password, salt):
     return key
 
 def encryptToFile(plainText, password, fileName, tags):
+    #upload to ggl drive - support
     salt = get_random_bytes(16)
     key = generateKey(password, salt)
     cipher = AES.new(key, AES.MODE_GCM)
@@ -28,6 +29,7 @@ def encryptToFile(plainText, password, fileName, tags):
         json.dump(encrypted_data, f)
 
 def decryptFromFile(password, fileName, tag=None):
+    #download from drive - todo
     with open(fileName, 'r') as f:
         encrypted_data = json.load(f)
 

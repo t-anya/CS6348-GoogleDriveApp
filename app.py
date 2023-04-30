@@ -121,6 +121,18 @@ def password_change():
 #     # todo
 #     return render_template('password_change.html')
 
+@app.route('/modify')
+def modify():
+    return render_template('enter_password_edit.html')
+
+
+@app.route('/pwd_edit_file',methods=['GET', 'POST'])
+def pwd_edit_file():
+    if request.method == "POST":
+        pwd = request.form['pwd']
+        session["pwd_user"] = pwd
+    return redirect('/edit')
+
 @app.route('/edit')
 def edit():
     #todo
@@ -163,19 +175,21 @@ def edit_ssn():
 
 @app.route('/edit_all')
 def edit_all():
-    #todo - pwd check
-    pwd = "SuperSecRetPassWord"
-    uinfo = [session["user_name"],session["net_id"],pwd]
+    pwd = session["pwd_user"]
+    fname = session["net_id"] + ".encrypted"
 
-    decryptedVal = decryptAll(uinfo)
-    if decryptedVal == 0 :
-        #todo -add flash support
-        flash("File is modified", "info")
-        return redirect('/')
-    else: 
-        session["edit_all_dec_val_bank"] = decryptedVal[0]
-        session["edit_all_dec_val_ssn"] = decryptedVal[1]
+    try:
+        dtext_all = decryptFromFile(pwd, fname)
+        dtext_all = json.loads(dtext_all)
+        session["edit_all_dec_val_bank"] = dtext_all["Bank-Acc"]
+        session["edit_all_dec_val_ssn"] = dtext_all["Social-Security"]
         return render_template('edit_all_details.html')
+
+    except Exception as e :
+        #todo flash support
+        flash(e,"info")
+        return redirect('/dash_board')
+
 
 @app.route('/write_to_file',methods=['GET', 'POST'])
 def write_to_file():
@@ -183,14 +197,14 @@ def write_to_file():
 
         bank_acc = request.form['bankacc']
         ssn = request.form['ssn']
-        bdetails = [bank_acc,ssn]
 
-        pwd = "SuperSecRetPassWord"
-        uinfo = [session["user_name"],session["net_id"],pwd]
-        encryptToFile(uinfo, bdetails)
+        pwd = session["pwd_user"]
+        fname = session["net_id"] + ".encrypted"
 
+        ptext = json.dumps({"Social-Security": ssn, "Bank-Acc": bank_acc})
+        encryptToFile(ptext, pwd, fname, tags=["Social-Security", "Bank-Acc"])
+        
         flash("File edited!", "info")
-
 
     return redirect('/dash_board')
 
