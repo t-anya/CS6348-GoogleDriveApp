@@ -46,12 +46,12 @@ def decryptFromFile(password, fileName, tag=None):
         plainText = cipher.decrypt_and_verify(cipherText, authTag)
         decrypted_data = plainText.decode('utf-8')
     except ValueError:
-        raise Exception("Decryption failed: The encrypted file has been modified, or the password that you entered is incorrect.")
+        return -1
 
     if tag is not None:
         decrypted_tags = json.loads(decrypted_data)
         if tag not in decrypted_tags:
-            raise Exception("Tag not found in the decrypted data.")
+            return -2
         return decrypted_tags[tag]
     else:
         return decrypted_data
