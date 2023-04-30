@@ -130,7 +130,31 @@ def delete_file(drive_service, file_id):
         print(f'File with ID "{file_id}" has been deleted.')
     except HttpError as error:
         print(f'An error occurred: {error}')
+
+def generate_link_by_name(drive_service, folder_name):
+    folder_id = get_folder_id(drive_service, folder_name)
+    
+    if folder_id:
+        # Change folder permissions to read-only
+        user_permission = {
+            'type': 'anyone',
+            'role': 'reader'
+        }
+        try:
+            drive_service.permissions().create(fileId=folder_id, body=user_permission).execute()
+            print(f'Folder permissions updated to read-only for {folder_name}.')
+        except HttpError as error:
+            print(f'An error occurred: {error}')
         
+        # Generate shareable link
+        shareable_folder_link = f'https://drive.google.com/drive/folders/{folder_id}?usp=sharing'
+        return shareable_folder_link
+    else:
+        print(f'Could not find a folder with the name: {folder_name}')
+        return None
+
+        
+if __name__ == '__main__':
     '''
     # Authenticate and get the drive_service object
     drive_service = authenticate_google_drive()
@@ -174,4 +198,16 @@ def delete_file(drive_service, file_id):
     file_name_to_delete = "upload.txt"
     file_id_to_delete = get_file_id_by_name(drive_service, file_name_to_delete, parent_id=folder_id)
     delete_file(drive_service, file_id_to_delete)
-    '''
+
+    # Authenticate and get the drive_service object
+    drive_service = authenticate_google_drive()
+   
+    folder_name = "MyNewFolder"
+
+    # Generate read-only shareable link for the folder by name
+    shareable_folder_link = generate_link_by_name(drive_service, folder_name)
+    if shareable_folder_link:
+        print(f'Shareable folder link: {shareable_folder_link}')
+     '''
+
+

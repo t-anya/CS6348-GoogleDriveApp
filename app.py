@@ -26,10 +26,11 @@ flow = Flow.from_client_secrets_file(
             "https://www.googleapis.com/auth/userinfo.email", "openid"],
     redirect_uri="http://127.0.0.1:5000/callback")
 
+
 @app.route("/")
 def login():
-    #todo home?
     return render_template('login.html')
+
 
 def login_required(function):
     def wrapper(*args, **kwargs):
@@ -79,14 +80,30 @@ def callback():
         session["name"] = id_info.get("name")
         print(id_info.get("sub"))
         print(id_info.get("name"))
-        return redirect("/dash_board")
+        return redirect("/home")
     except Exception as e:
         print("Error in callback function:", e)
         return "An error occurred: {}".format(str(e))
 
 
-@app.route('/dash_board', methods=['GET', 'POST'])
+@app.route('/home')
 @login_required
+def home():
+    return render_template('home.html')
+
+
+@app.route('/home_net_id', methods=['GET', 'POST'])
+def home_net_id():
+    if request.method == 'POST':
+        net_id = request.form['net_id']
+        print(net_id)
+        return render_template('dash_board.html')
+    else:
+        return render_template('dash_board.html')
+
+
+@app.route('/dash_board', methods=['GET', 'POST'])
+# @login_required
 def dash_board():
     # todo
     if request.method == 'POST':
@@ -135,7 +152,7 @@ def pwd_edit_file():
 
 @app.route('/edit')
 def edit():
-    #todo
+    # todo
     session["net_id"] = "jxk10000"
     session["user_name"] = "Chase"
     return render_template('edit.html')
@@ -143,35 +160,37 @@ def edit():
 
 @app.route('/edit_bank')
 def edit_bank():
-    #todo - pwd check
+    # todo - pwd check
     pwd = "SuperSecRetPassWord"
     fname = session["net_id"] + ".encrypted"
 
     decryptedVal = decryptFromFile(pwd, fname, tag="Bank-Acc")
-    if decryptedVal == 0 :
-        #todo -add flash support
+    if decryptedVal == 0:
+        # todo -add flash support
         flash("File is modified", "info")
         return redirect('/')
-    else: 
+    else:
         session["edit_all_dec_val_bank"] = decryptedVal[0]
         session["edit_all_dec_val_ssn"] = decryptedVal[1]
         return render_template('edit_bank_details.html')
 
+
 @app.route('/edit_ssn')
 def edit_ssn():
-    #todo - pwd check
+    # todo - pwd check
     pwd = "SuperSecRetPassWord"
-    uinfo = [session["user_name"],session["net_id"],pwd]
+    uinfo = [session["user_name"], session["net_id"], pwd]
 
     decryptedVal = decryptAll(uinfo)
-    if decryptedVal == 0 :
-        #todo -add flash support
+    if decryptedVal == 0:
+        # todo -add flash support
         flash("File is modified", "info")
         return redirect('/')
-    else: 
+    else:
         session["edit_all_dec_val_bank"] = decryptedVal[0]
         session["edit_all_dec_val_ssn"] = decryptedVal[1]
         return render_template('edit_ssn_details.html')
+
 
 @app.route('/edit_all')
 def edit_all():
@@ -208,50 +227,52 @@ def write_to_file():
 
     return redirect('/dash_board')
 
-@app.route('/write_to_file_ssn',methods=['GET', 'POST'])
+
+@app.route('/write_to_file_ssn', methods=['GET', 'POST'])
 def write_to_file_ssn():
     if request.method == "POST":
 
         ssn = request.form['ssn']
-        bdetails = [ session["edit_all_dec_val_bank"],ssn]
+        bdetails = [session["edit_all_dec_val_bank"], ssn]
 
         pwd = "SuperSecRetPassWord"
-        uinfo = [session["user_name"],session["net_id"],pwd]
+        uinfo = [session["user_name"], session["net_id"], pwd]
         encryptToFile(uinfo, bdetails)
 
         flash("File edited!", "info")
 
-
     return redirect('/dash_board')
 
-@app.route('/write_to_file_bank',methods=['GET', 'POST'])
+
+@app.route('/write_to_file_bank', methods=['GET', 'POST'])
 def write_to_file_bank():
     if request.method == "POST":
 
         bank_acc = request.form['bankacc']
-        bdetails = [ bank_acc, session["edit_all_dec_val_ssn"]]
+        bdetails = [bank_acc, session["edit_all_dec_val_ssn"]]
 
         pwd = "SuperSecRetPassWord"
-        uinfo = [session["user_name"],session["net_id"],pwd]
+        uinfo = [session["user_name"], session["net_id"], pwd]
         encryptToFile(uinfo, bdetails)
 
         flash("File edited!", "info")
 
-
     return redirect('/dash_board')
 
-@app.route('/create_new_file', methods=['GET','POST'])
+
+@app.route('/create_new_file', methods=['GET', 'POST'])
 def create_new_file():
     if request.method == 'POST':
         bank_acc = request.form['bank_acc']
         ssn = request.form['ssn']
         pwd = request.form['pwd']
 
-        #todo unname & netid
+        # todo unname & netid
         uinfo = ["Chase", "jxk10000", pwd]
         bdetails = [bank_acc, ssn]
 
-        ptext = json.dumps({"Social-Security": bdetails[1], "Bank-Acc": bdetails[0]})
+        ptext = json.dumps(
+            {"Social-Security": bdetails[1], "Bank-Acc": bdetails[0]})
         fname = uinfo[1] + ".encrypted"
 
         encryptToFile(ptext, pwd, fname, tags=["Social-Security", "Bank-Acc"])
@@ -259,7 +280,7 @@ def create_new_file():
         drive_service = authenticate_google_drive()
         folder_name = uinfo[1]
 
-        #todo - edge cases -> already present file
+        # todo - edge cases -> already present file
         folder_id = create_folder(drive_service, folder_name)
 
         local_file_name = fname
@@ -269,14 +290,13 @@ def create_new_file():
         with open(local_file_path, 'r') as f:
             file_content = f.read()
 
-        file_id = create_file(drive_service, os.path.basename(local_file_path), file_content, folder_id)
+        file_id = create_file(drive_service, os.path.basename(
+            local_file_path), file_content, folder_id)
         user_email = '6348projectutd2023@gmail.com'
         change_permissions(drive_service, file_id, user_email)
 
         return render_template('dash_board.html')
 
 
-
 if __name__ == '__main__':
     app.run(debug=True)
-
