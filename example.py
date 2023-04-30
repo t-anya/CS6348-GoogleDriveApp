@@ -9,6 +9,7 @@ from GoogleDr_api import (
     get_file_id_by_name,
     download_file,
     delete_file,
+    generate_link_by_name
 )
 
 
@@ -56,3 +57,11 @@ download_file(drive_service, file_id_to_download, output_file_name)
 # file_name_to_delete = "upload.txt"
 # file_id_to_delete = get_file_id_by_name(drive_service, file_name_to_delete, parent_id=folder_id)
 # delete_file(drive_service, file_id_to_delete)
+
+
+folder_name = "MyNewFolder"
+
+# Generate read-only shareable link for the folder by name
+shareable_folder_link = generate_link_by_name(drive_service, folder_name)
+if shareable_folder_link:
+    print(f'Shareable folder link: {shareable_folder_link}')
