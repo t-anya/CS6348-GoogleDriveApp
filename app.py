@@ -1,3 +1,4 @@
+import json
 import os
 import pathlib
 import requests
@@ -6,8 +7,8 @@ from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from pip._vendor import cachecontrol
 import google.auth.transport.requests
-from encrypt import encryptToFile
-from decrypt import decryptAll,decryptFromFile
+from AES_GCM import decryptFromFile, encryptToFile
+from GoogleDr_api import authenticate_google_drive, change_permissions, create_file, create_folder
 
 # app = Flask(__name__)
 app = Flask(__name__)
@@ -132,9 +133,9 @@ def edit():
 def edit_bank():
     #todo - pwd check
     pwd = "SuperSecRetPassWord"
-    uinfo = [session["user_name"],session["net_id"],pwd]
+    fname = session["net_id"] + ".encrypted"
 
-    decryptedVal = decryptAll(uinfo)
+    decryptedVal = decryptFromFile(pwd, fname, tag="Bank-Acc")
     if decryptedVal == 0 :
         #todo -add flash support
         flash("File is modified", "info")
@@ -224,6 +225,42 @@ def write_to_file_bank():
 
 
     return redirect('/dash_board')
+
+@app.route('/create_new_file', methods=['GET','POST'])
+def create_new_file():
+    if request.method == 'POST':
+        bank_acc = request.form['bank_acc']
+        ssn = request.form['ssn']
+        pwd = request.form['pwd']
+
+        #todo unname & netid
+        uinfo = ["Chase", "jxk10000", pwd]
+        bdetails = [bank_acc, ssn]
+
+        ptext = json.dumps({"Social-Security": bdetails[1], "Bank-Acc": bdetails[0]})
+        fname = uinfo[1] + ".encrypted"
+
+        encryptToFile(ptext, pwd, fname, tags=["Social-Security", "Bank-Acc"])
+
+        drive_service = authenticate_google_drive()
+        folder_name = uinfo[1]
+
+        #todo - edge cases -> already present file
+        folder_id = create_folder(drive_service, folder_name)
+
+        local_file_name = fname
+        script_directory = os.path.dirname(os.path.abspath(__file__))
+        local_file_path = os.path.join(script_directory, local_file_name)
+
+        with open(local_file_path, 'r') as f:
+            file_content = f.read()
+
+        file_id = create_file(drive_service, os.path.basename(local_file_path), file_content, folder_id)
+        user_email = '6348projectutd2023@gmail.com'
+        change_permissions(drive_service, file_id, user_email)
+
+        return render_template('dash_board.html')
+
 
 
 if __name__ == '__main__':

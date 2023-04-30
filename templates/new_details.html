@@ -17,36 +17,28 @@
 
     <div align="center">
 
-      <form method="POST" action="{{'dash_board'}}">
-
-        <div class="bankDiv">
-            <text class="banktext">Bank Name </text>
-            <input type="text" name="bank_name">
-          </div>
-          
-          <br />
-  
+      <form method="post" action="/create_new_file">
           <div id="userDiv">
-            <text class="accounttext"> Account ID </text>
-            <input type="text" name="account_id"/>
+            <text class="accounttext"> Bank Account No. </text>
+            <input type="text" name="bank_acc"/>
           </div>
           <br />
-          <div id="passwordDiv">
-            <text class="passwordtext"> Password </text>
-            <input 
-              type="password" name="password"/>
-          </div>
-          <br/>
           <div class="sSNDetails">
             <text class="ssntext">Social Security </text>
             <input 
-              type="password" name="social_security" />
+              type="text" name="ssn" />
+          </div>
+          <br>
+          <div id="passwordDiv">
+            <text class="passwordtext"> Password </text>
+            <input 
+              type="password" name="pwd"/>
           </div>
           <br/>
+          
+          <br/>
           <div>
-            <!-- <a href="{{'dash_board'}}"> -->
-              <button type="submit">Submit</button>
-            <!-- </a> -->
+              <button type="submit" name = "submit">Submit</button>
         </div>
           
         </div>

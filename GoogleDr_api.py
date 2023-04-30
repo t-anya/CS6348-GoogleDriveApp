@@ -131,7 +131,6 @@ def delete_file(drive_service, file_id):
     except HttpError as error:
         print(f'An error occurred: {error}')
         
-if __name__ == '__main__':
     '''
     # Authenticate and get the drive_service object
     drive_service = authenticate_google_drive()
