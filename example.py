@@ -20,9 +20,9 @@ from GoogleDr_api import *
 drive_service = authenticate_google_drive()
 
 
-
+'''
 # Create a folder in Google Drive
-folder_name = "MyNewFolder"
+folder_name = "to see if it works"
 folder_id = create_folder(drive_service, folder_name)
 
 # Set the local and remote file names
@@ -71,18 +71,20 @@ if shareable_folder_link:
 
 #example of read and rerite file
 
+'''
 drive_service = authenticate_google_drive()
-folder_name = "temple"
+folder_name = "abc123456"
 folder_id = get_folder_id(drive_service, folder_name)
-file_name_to_read = "txs220004.encrypted"
+file_name_to_read = "abc123456.encrypted"
 file_id = get_file_id_by_name(drive_service, file_name_to_read, parent_id=folder_id)
 
+
 # Read the file content
-file_content = read_file(drive_service, file_id)
+file_content = read_file2(drive_service, file_id)
 print("File content:", file_content)
 
-# rewrite the file content
-new_content = "new hello world"
-rewrite_file(drive_service, file_id, new_content, mime_type='text/plain')
-print(read_file(drive_service, file_id))
+# # rewrite the file content
+# new_content = "new hello world"
+# rewrite_file(drive_service, file_id, new_content, mime_type='text/plain')
+# print(read_file(drive_service, file_id))
     
