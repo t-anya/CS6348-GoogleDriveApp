@@ -6,46 +6,81 @@
     <title>New Details</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        
+        h3 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        form {
+            width: 500px;
+            background-color: #fafafa;
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 0 auto;
+        }
+        
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        
+        button[type="submit"] {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        button[type="submit"]:hover {
+            background-color: #555;
+        }
+    </style>
 </head>
 
 <body>
-  {% include "navbar.html"%}
-    <br />
+    {% include "navbar.html"%}
+    <br/>
 
-    <h3 align="center"> Enter Details below </h3>
+    <h3> Enter Details below </h3>
     <br />
 
     <div align="center">
-
-      <form method="post" action="/create_new_file">
-          <div id="userDiv">
-            <text class="accounttext"> Bank Account No. </text>
-            <input type="text" name="bank_acc"/>
-          </div>
-          <br />
-          <div class="sSNDetails">
-            <text class="ssntext">Social Security </text>
-            <input 
-              type="text" name="ssn" />
-          </div>
-          <br>
-          <div id="passwordDiv">
-            <text class="passwordtext"> Password </text>
-            <input 
-              type="password" name="pwd"/>
-          </div>
-          <br/>
-          
-          <br/>
-          <div>
-              <button type="submit" name = "submit">Submit</button>
-        </div>
-          
-        </div>
-
-      </form>
-
-          
+        <form method="post" action="/create_new_file">
+            <div id="userDiv">
+                <label for="bank_acc">Bank Account No.</label>
+                <input type="text" name="bank_acc" id="bank_acc" />
+            </div>
+            <br />
+            <div class="sSNDetails">
+                <label for="ssn">Social Security</label>
+                <input type="text" name="ssn" id="ssn" />
+            </div>
+            <br>
+            <div id="passwordDiv">
+                <label for="pwd">Password</label>
+                <input type="password" name="pwd" id="pwd" />
+            </div>
+            <br/>
+            <div>
+                <button type="submit" name="submit">Submit</button>
+            </div>
+        </form>
     </div>
     <br>
     <br>
