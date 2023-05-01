@@ -1,38 +1,61 @@
-<div>
-  <style>
-    ul {
-      list-style-type: none;
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      background-color: #333;
-    }
+<style>
+  /* Set the style for the navigation bar */
+  ul.navbar {
+    list-style-type: none;
+    margin: 0px;
+    padding: 5px;
+    overflow: hidden;
+    background-color: #333;
+    display: flex;
+    justify-content: space-between;
+  }
 
-    li {
-      float: left;
-    }
+  /* Set the style for each navigation bar item */
+  ul.navbar li {
+    float: left;
+  }
 
-    li a {
-      display: block;
-      color: white;
-      text-align: center;
-      padding: 14px 16px;
-      text-decoration: none;
-    }
+  ul.navbar li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 14px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 16px;
+  }
 
-    li a:hover {
-      color: rgb(144, 144, 144);
-    }
+  /* Change the color of the active navigation bar item */
+  ul.navbar li a.active {
+    background-color: #5a5d5c;
+  }
 
-    .active {
-      background-color: #5a5d5c;
-    }
-  </style>
-  </head>
-<body></body>
-  <ul>
-    <li><a href="{{'dash_board'}}">Home</a></li>
-    <li style="float:right"><a class="active" href="{{url_for('glogout')}}">Logout</a></li>
+  /* Change the color of the navigation bar items on hover */
+  ul.navbar li a:hover {
+    color: #ddd;
+  }
+
+  /* Set the style for the logout button */
+  .logout-button {
+    background-color: #ddd;
+    color: #333;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  /* Change the color of the logout button on hover */
+  .logout-button:hover {
+    background-color: #ccc;
+  }
+</style>
+
+<!-- Define the navigation bar HTML -->
+<nav>
+  <ul class="navbar">
+    <li><a href="{{'dash_board'}}" class="active">Home</a></li>
+    <li><form method="post" action="{{url_for('glogout')}}"><button class="logout-button">Logout</button></form></li>
   </ul>
-
-</div>
+</nav>
