@@ -9,6 +9,10 @@ from pip._vendor import cachecontrol
 import google.auth.transport.requests
 from AES_GCM import decryptFromDriveFile, decryptFromFile, encryptDriveFile, encryptToFile
 from GoogleDr_api import authenticate_google_drive, change_permissions, create_file, create_folder
+# For secret sharing
+from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
+from Crypto.Protocol.SecretSharing import Shamir
 
 # app = Flask(__name__)
 app = Flask(__name__)
@@ -364,6 +368,66 @@ def decrypted():
     data = request.args.get('data')
     print(data)
     return render_template('decrypted.html', data = data)
+
+@app.route('/secret_sharing')
+def secret_sharing():
+    return render_template('secret_sharing.html')
+
+@app.route('/enter')
+def enter():
+    return render_template('enter.html')
+
+@app.route('/decryptshare', methods=['POST','GET'])
+def decryptshare():
+    # Get the shares from the HTML form
+    idx1 = int(request.form['share1_idx'])
+    share1 = bytes.fromhex(request.form['share1_share'])
+    idx2 = int(request.form['share2_idx'])
+    share2 = bytes.fromhex(request.form['share2_share'])
+
+    # Combine the shares to reconstruct the key
+    shares = [(idx1, share1), (idx2, share2)]
+    key = Shamir.combine(shares)
+
+    # Decrypt the file using the key
+    with open("sdec.txt", "rb") as fi:
+        nonce, tag = [fi.read(16) for x in range(2)]
+        cipher = AES.new(key, AES.MODE_EAX, nonce)
+        try:
+            result = cipher.decrypt(fi.read())
+            cipher.verify(tag)
+            with open("output1.txt", "wb") as fo:
+                fo.write(result)
+            return send_file("output1.txt", as_attachment=True)
+        except Exception as e:
+            flash("An error occured", "error")
+            return redirect('/dash_board')
+        
+@app.route('/generate', methods=['POST','GET'])
+def generate():
+    # Generate a random key
+    key = get_random_bytes(16)
+
+    # Split the key into 3 shares, requiring at least 2 to reconstruct
+    shares = Shamir.split(2, 3, key)
+
+    # Store the shares in a list of dictionaries to be passed to the HTML template
+    share_list = []
+    for idx, share in shares:
+        share_dict = {'idx': idx, 'value': share.hex()}
+        share_list.append(share_dict)
+
+    # Encrypt the file using the key
+    with open("upload.txt", "rb") as fi, open("sdec.txt", "wb") as fo:
+        # todo: Add file path instead of harcoding the file name
+        cipher = AES.new(key, AES.MODE_EAX)
+        ct, tag = cipher.encrypt(fi.read()), cipher.digest()
+        fo.write(cipher.nonce + tag + ct)
+
+    # Pass the shares to the HTML template and render it
+    return render_template('generate.html', shares=share_list)
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
