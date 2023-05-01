@@ -14,6 +14,13 @@
     <div align="center">
 
         <h3>Dash Board</h3>
+        {% with messages = get_flashed_messages() %}
+        	{% if messages %}
+            	{% for msg in messages %}
+                	<h5>{{msg}}</h5>
+            	{% endfor %}
+        	{% endif %}
+        {% endwith %}
 
         <div class="row1 centered">
             <div>
@@ -22,7 +29,7 @@
                 </a>
             </div>
             <div>
-                <a href="{{url_for('edit')}}">
+                <a href="{{url_for('modify')}}">
                     <button class="btn">Modify</button>                
                 </a> 
             </div>
@@ -39,7 +46,9 @@
                     <button class="btn">Encryption</button>              
             </div>
             <div>
-                <button class="btn">Decryption</button>
+		    <a href="{{url_for('decrypt')}}">
+			<button class="btn">Decryption</button>
+		</a>
               </div>
             <div>
               <button class="btn">Secret Sharing</button>

@@ -2,12 +2,12 @@ import json
 import os
 import pathlib
 import requests
-from flask import Flask, session, abort, redirect, request, render_template, flash
+from flask import Flask, session, abort, redirect, request, render_template, flash, url_for
 from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from pip._vendor import cachecontrol
 import google.auth.transport.requests
-from AES_GCM import decryptFromFile, encryptToFile
+from AES_GCM import decryptFromDriveFile, decryptFromFile, encryptDriveFile, encryptToFile
 from GoogleDr_api import authenticate_google_drive, change_permissions, create_file, create_folder
 
 # app = Flask(__name__)
@@ -96,14 +96,15 @@ def home():
 def home_net_id():
     if request.method == 'POST':
         net_id = request.form['net_id']
-        print(net_id)
+        session["net_id"] = net_id
+        print("XXX")
+        print(session["net_id"])
         return render_template('dash_board.html')
     else:
         return render_template('dash_board.html')
 
 
 @app.route('/dash_board', methods=['GET', 'POST'])
-# @login_required
 def dash_board():
     # todo
     if request.method == 'POST':
@@ -123,92 +124,144 @@ def new_details():
     return render_template('new_details.html')
 
 
-@app.route('/password_change')
+@app.route('/password_change', methods = ['GET', 'POST'])
 def password_change():
-    # todo
-    try:
-        return render_template('password_change.html')
-    except Exception as e:
-        print("Error in callback function:", e)
-        return "An error occurred: {}".format(str(e))
+    if request.method == 'POST':
+        pwd = request.form['old_password']
+        session['pwd_user'] = pwd
+        # fname = session["net_id"] + ".encrypted"
+        fname = "jxk10000.encrypted"
+        text = decryptFromFile(pwd, fname)
+        data = json.loads(text)
+        print(data)
+        bank = data['Bank-Acc']
+        ssn = data['Social-Security']
+        return redirect(url_for('new_password', bank = bank, ssn = ssn))
+    else:
+        try:
+            return render_template('password_change.html')
+        except Exception as e:
+            print("Error in callback function:", e)
+            return "An error occurred: {}".format(str(e))
 
+
+@app.route('/new_password', methods = ['GET', 'POST'])
+def new_password():
+    bank = request.args.get('bank')
+    ssn = request.args.get('ssn')
+    print("I'm here " +  bank + ", "+ ssn)
+    if request.method == 'POST':
+        pwd = request.form['new_password']
+        session['pwd_user'] = pwd
+        # fname = session['net_id'] + ".encrypted"
+        fname = "jxk10000.encrypted"
+        ptext = json.dumps({'Social-Security': ssn, 'Bank-Acc': bank})
+        encryptToFile(ptext, pwd, fname, tags = ['Social-Security', 'Bank-Acc'])
+        return redirect('/dash_board')
+    else:
+        try:
+            return render_template('new_password.html')
+        except Exception as e:
+            print("Error in callback function:", e)
+            return "An error occurred: {}".format(str(e))
 
 # @app.route('/password_change')
 # def password_change():
 #     # todo
 #     return render_template('password_change.html')
 
+@app.route('/modify')
+def modify():
+    return render_template('enter_password_edit.html')
+
+
+@app.route('/pwd_edit_file',methods=['GET', 'POST'])
+def pwd_edit_file():
+    if request.method == "POST":
+        pwd = request.form['pwd']
+        session["pwd_user"] = pwd
+    return redirect('/edit')
+
 @app.route('/edit')
 def edit():
-    # todo
-    session["net_id"] = "jxk10000"
-    session["user_name"] = "Chase"
     return render_template('edit.html')
 
 
 @app.route('/edit_bank')
 def edit_bank():
-    # todo - pwd check
-    pwd = "SuperSecRetPassWord"
+    pwd = session["pwd_user"]
+    folder_name = session["net_id"]
     fname = session["net_id"] + ".encrypted"
 
-    decryptedVal = decryptFromFile(pwd, fname, tag="Bank-Acc")
-    if decryptedVal == 0:
-        # todo -add flash support
-        flash("File is modified", "info")
-        return redirect('/')
+    dtext_all = decryptFromDriveFile(pwd, fname, folder_name)
+
+    if dtext_all == -1:
+        flash("Decryption failed: The encrypted file has been modified, or the password that you entered is incorrect.","info")            
+        return redirect('/dash_board')
+    elif dtext_all == -2:
+        flash("Tag not found in the decrypted data.","info")           
+        return redirect('/dash_board')
     else:
-        session["edit_all_dec_val_bank"] = decryptedVal[0]
-        session["edit_all_dec_val_ssn"] = decryptedVal[1]
+        dtext_all = json.loads(dtext_all)
+        session["edit_all_dec_val_bank"] = dtext_all["Bank-Acc"]
+        session["edit_all_dec_val_ssn"] = dtext_all["Social-Security"]
         return render_template('edit_bank_details.html')
 
 
 @app.route('/edit_ssn')
 def edit_ssn():
-    # todo - pwd check
-    pwd = "SuperSecRetPassWord"
-    uinfo = [session["user_name"], session["net_id"], pwd]
+    pwd = session["pwd_user"]
+    folder_name = session["net_id"]
+    fname = session["net_id"] + ".encrypted"
 
-    decryptedVal = decryptAll(uinfo)
-    if decryptedVal == 0:
-        # todo -add flash support
-        flash("File is modified", "info")
-        return redirect('/')
+    dtext_all = decryptFromDriveFile(pwd, fname, folder_name)
+
+    if dtext_all == -1:
+        flash("Decryption failed: The encrypted file has been modified, or the password that you entered is incorrect.","info")            
+        return redirect('/dash_board')
+    elif dtext_all == -2:
+        flash("Tag not found in the decrypted data.","info")           
+        return redirect('/dash_board')
     else:
-        session["edit_all_dec_val_bank"] = decryptedVal[0]
-        session["edit_all_dec_val_ssn"] = decryptedVal[1]
+        dtext_all = json.loads(dtext_all)
+        session["edit_all_dec_val_bank"] = dtext_all["Bank-Acc"]
+        session["edit_all_dec_val_ssn"] = dtext_all["Social-Security"]
         return render_template('edit_ssn_details.html')
-
 
 @app.route('/edit_all')
 def edit_all():
-    # todo - pwd check
-    pwd = "SuperSecRetPassWord"
-    uinfo = [session["user_name"], session["net_id"], pwd]
+    pwd = session["pwd_user"]
+    folder_name = session["net_id"]
+    fname = session["net_id"] + ".encrypted"
 
-    decryptedVal = decryptAll(uinfo)
-    if decryptedVal == 0:
-        # todo -add flash support
-        flash("File is modified", "info")
-        return redirect('/')
+    dtext_all = decryptFromDriveFile(pwd, fname, folder_name)
+
+    if dtext_all == -1:
+        flash("Decryption failed: The encrypted file has been modified, or the password that you entered is incorrect.","info")            
+        return redirect('/dash_board')
+    elif dtext_all == -2:
+        flash("Tag not found in the decrypted data.","info")           
+        return redirect('/dash_board')
     else:
-        session["edit_all_dec_val_bank"] = decryptedVal[0]
-        session["edit_all_dec_val_ssn"] = decryptedVal[1]
+        dtext_all = json.loads(dtext_all)
+        session["edit_all_dec_val_bank"] = dtext_all["Bank-Acc"]
+        session["edit_all_dec_val_ssn"] = dtext_all["Social-Security"]
         return render_template('edit_all_details.html')
 
-
-@app.route('/write_to_file', methods=['GET', 'POST'])
+@app.route('/write_to_file',methods=['GET', 'POST'])
 def write_to_file():
     if request.method == "POST":
 
         bank_acc = request.form['bankacc']
         ssn = request.form['ssn']
-        bdetails = [bank_acc, ssn]
 
-        pwd = "SuperSecRetPassWord"
-        uinfo = [session["user_name"], session["net_id"], pwd]
-        encryptToFile(uinfo, bdetails)
+        pwd = session["pwd_user"]
+        folder_name = session["net_id"]
+        fname = session["net_id"] + ".encrypted"
 
+        ptext = json.dumps({"Social-Security": ssn, "Bank-Acc": bank_acc})
+        encryptDriveFile(ptext, pwd, fname, folder_name, tags=["Social-Security", "Bank-Acc"])
+        
         flash("File edited!", "info")
 
     return redirect('/dash_board')
@@ -218,13 +271,16 @@ def write_to_file():
 def write_to_file_ssn():
     if request.method == "POST":
 
+        bank_acc = session["edit_all_dec_val_bank"]
         ssn = request.form['ssn']
-        bdetails = [session["edit_all_dec_val_bank"], ssn]
 
-        pwd = "SuperSecRetPassWord"
-        uinfo = [session["user_name"], session["net_id"], pwd]
-        encryptToFile(uinfo, bdetails)
+        pwd = session["pwd_user"]
+        folder_name = session["net_id"]
+        fname = session["net_id"] + ".encrypted"
 
+        ptext = json.dumps({"Social-Security": ssn, "Bank-Acc": bank_acc})
+        encryptDriveFile(ptext, pwd, fname, folder_name, tags=["Social-Security", "Bank-Acc"])
+        
         flash("File edited!", "info")
 
     return redirect('/dash_board')
@@ -235,14 +291,16 @@ def write_to_file_bank():
     if request.method == "POST":
 
         bank_acc = request.form['bankacc']
-        bdetails = [bank_acc, session["edit_all_dec_val_ssn"]]
+        ssn = session["edit_all_dec_val_ssn"]
 
-        pwd = "SuperSecRetPassWord"
-        uinfo = [session["user_name"], session["net_id"], pwd]
-        encryptToFile(uinfo, bdetails)
+        pwd = session["pwd_user"]
+        folder_name = session["net_id"]
+        fname = session["net_id"] + ".encrypted"
 
+        ptext = json.dumps({"Social-Security": ssn, "Bank-Acc": bank_acc})
+        encryptDriveFile(ptext, pwd, fname, folder_name, tags=["Social-Security", "Bank-Acc"])
+        
         flash("File edited!", "info")
-
     return redirect('/dash_board')
 
 
@@ -252,21 +310,20 @@ def create_new_file():
         bank_acc = request.form['bank_acc']
         ssn = request.form['ssn']
         pwd = request.form['pwd']
-
-        # todo unname & netid
-        uinfo = ["Chase", "jxk10000", pwd]
+        
         bdetails = [bank_acc, ssn]
+        net_id = session["net_id"]
 
         ptext = json.dumps(
             {"Social-Security": bdetails[1], "Bank-Acc": bdetails[0]})
-        fname = uinfo[1] + ".encrypted"
+        fname = net_id + ".encrypted"
+        print(fname)
 
         encryptToFile(ptext, pwd, fname, tags=["Social-Security", "Bank-Acc"])
 
         drive_service = authenticate_google_drive()
-        folder_name = uinfo[1]
+        folder_name = net_id
 
-        # todo - edge cases -> already present file
         folder_id = create_folder(drive_service, folder_name)
 
         local_file_name = fname
@@ -283,6 +340,30 @@ def create_new_file():
 
         return render_template('dash_board.html')
 
+@app.route('/decrypt', methods = ['POST', 'GET'])
+def decrypt():
+    # pwd = session['pwd_user']
+    # fname = session['net_id']
+    pwd = "SuperSecRetPassWord"
+    fname = "jxk10000.encrypted"
+    if request.method == 'POST':
+        selection = request.form['decrypt']
+        if selection == "ssn":
+            data = decryptFromFile(pwd, fname, tag = 'Social-Security')
+        elif selection == "bank":
+            data = decryptFromFile(pwd, fname, tag = 'Bank')
+        else:
+            data = decryptFromFile(pwd, fname)
+            data = "Social-Security: " + str(data[0]) + "Bank Acc: " + str(data[1])
+        return redirect(url_for('decrypted', data = data))
+    else:
+        return render_template('decrypt.html')
+
+@app.route('/decrypted', methods = ['POST', 'GET'])
+def decrypted():
+    data = request.args.get('data')
+    print(data)
+    return render_template('decrypted.html', data = data)
 
 if __name__ == '__main__':
     app.run(debug=True)

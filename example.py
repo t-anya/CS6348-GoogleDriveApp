@@ -1,16 +1,19 @@
-# example.py
 
+ 
+
+# example.py
 import os
-from GoogleDr_api import (
-    authenticate_google_drive,
-    create_folder,
-    create_file,
-    change_permissions,
-    get_file_id_by_name,
-    download_file,
-    delete_file,
-    generate_link_by_name
-)
+import pickle
+import io
+import google.auth
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+from googleapiclient.http import MediaFileUpload
+from googleapiclient.http import MediaIoBaseDownload
+from GoogleDr_api import *
 
 
 # Authenticate and get the drive_service object
@@ -65,3 +68,21 @@ folder_name = "MyNewFolder"
 shareable_folder_link = generate_link_by_name(drive_service, folder_name)
 if shareable_folder_link:
     print(f'Shareable folder link: {shareable_folder_link}')
+
+#example of read and rerite file
+
+drive_service = authenticate_google_drive()
+folder_name = "temple"
+folder_id = get_folder_id(drive_service, folder_name)
+file_name_to_read = "txs220004.encrypted"
+file_id = get_file_id_by_name(drive_service, file_name_to_read, parent_id=folder_id)
+
+# Read the file content
+file_content = read_file(drive_service, file_id)
+print("File content:", file_content)
+
+# rewrite the file content
+new_content = "new hello world"
+rewrite_file(drive_service, file_id, new_content, mime_type='text/plain')
+print(read_file(drive_service, file_id))
+    

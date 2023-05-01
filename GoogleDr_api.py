@@ -10,10 +10,6 @@ from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
 from googleapiclient.http import MediaIoBaseDownload
 
-
-
-
-
 def authenticate_google_drive():
     creds = None
     SCOPES = ['https://www.googleapis.com/auth/drive']
@@ -152,25 +148,65 @@ def generate_link_by_name(drive_service, folder_name):
     else:
         print(f'Could not find a folder with the name: {folder_name}')
         return None
+    
+from googleapiclient.http import MediaIoBaseDownload
+
+def read_file(service, file_id, mimeType=None):
+    if not file_id:
+        print("File ID is None. Please check the file ID.")
+        return
+
+    file = service.files().get(fileId=file_id).execute()
+    if not mimeType:
+        mimeType = file.get('mimeType', 'text/plain')
+
+    if 'google-apps' in mimeType:
+        # Export Google Workspace file
+        if 'document' in mimeType:
+            export_mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        elif 'spreadsheet' in mimeType:
+            export_mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        elif 'presentation' in mimeType:
+            export_mimeType = 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+        else:
+            print('Unsupported Google Workspace file type')
+            return
+
+        request = service.files().export_media(fileId=file_id, mimeType=export_mimeType)
+    else:
+        request = service.files().get_media(fileId=file_id)
+
+    file_content = io.BytesIO()
+    downloader = MediaIoBaseDownload(file_content, request)
+    done = False
+    while not done:
+        status, done = downloader.next_chunk()
+        print(f'Download progress: {int(status.progress() * 100)}.')
+    file_content.seek(0)
+
+    if 'google-apps' in mimeType:
+        return file_content  # Returns the content as binary, you may need to convert it to the desired format
+    else:
+        return file_content.getvalue().decode('utf-8')  # Decode content to utf-8 for plain text files
+
+
+def rewrite_file(drive_service, file_id, new_content, mime_type='text/plain'):
+    with tempfile.NamedTemporaryFile(mode='w+', delete=False) as temp_file:
+        temp_file.write(new_content)
+        temp_file.flush()
+
+        media = MediaFileUpload(temp_file.name, mimetype=mime_type)
+        drive_service.files().update(fileId=file_id, media_body=media).execute()
+
+    os.unlink(temp_file.name)  # remove the temporary file
+    print(f'File with ID "{file_id}" has been updated.')
+
+
+
 
         
 if __name__ == '__main__':
-    '''
-    # Authenticate and get the drive_service object
-    drive_service = authenticate_google_drive()
-    
- 
-
-    # Create a folder in Google Drive
-    folder_name = "MyNewFolder"
-    folder_id = create_folder(drive_service, folder_name)
-
-    # Set the local and remote file names
-    local_file_name = 'upload.txt'
-    script_directory = os.path.dirname(os.path.abspath(__file__))
-    local_file_path = os.path.join(script_directory, local_file_name)
-
-
+   
     # Read file content from local file
     with open(local_file_path, 'r') as f:
         file_content = f.read()
@@ -208,6 +244,9 @@ if __name__ == '__main__':
     shareable_folder_link = generate_link_by_name(drive_service, folder_name)
     if shareable_folder_link:
         print(f'Shareable folder link: {shareable_folder_link}')
-     '''
+    
+    
+
+
 
 

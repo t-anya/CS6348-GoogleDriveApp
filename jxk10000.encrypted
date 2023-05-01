@@ -1,1 +1,5 @@
+<<<<<<< HEAD
 {"salt": "HJi+Nrk7J9HeMH/7b60R6Q==", "nonce": "G48uR1VOJkLX+5Dx3Rre/g==", "authTag": "46vkg/xDygP/sFZVdlNQ/A==", "cipherText": "lvNUL27bBz+1DAFhPV3lyMu8P7ysYrG+f9aCB37QSPDi+euX0rJOt0TcYAgDWuaHKw==", "tags": ["Social-Security", "Bank-Acc"]}
+=======
+{"salt": "ykMcEU4Hriu9JQ2yjprusA==", "nonce": "AG+P2jjJBxB/nB8ERWyHyg==", "authTag": "bHB8gOpdIdZzmbcRleniVw==", "cipherText": "4qP+4R9DRFNoQf2VjRlUMcsUwUNntsLTSAWzmmFBFyLNvxpbDmDySRPbwxuEFrMoiAE=", "tags": ["Social-Security", "Bank-Acc"]}
+>>>>>>> 22b93a0518fdd5b417fbe3e8d817988bbc31c87d
