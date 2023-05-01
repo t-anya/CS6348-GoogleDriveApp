@@ -124,15 +124,46 @@ def new_details():
     return render_template('new_details.html')
 
 
-@app.route('/password_change')
+@app.route('/password_change', methods = ['GET', 'POST'])
 def password_change():
-    # todo
-    try:
-        return render_template('password_change.html')
-    except Exception as e:
-        print("Error in callback function:", e)
-        return "An error occurred: {}".format(str(e))
+    if request.method == 'POST':
+        pwd = request.form['old_password']
+        session['pwd_user'] = pwd
+        # fname = session["net_id"] + ".encrypted"
+        fname = "jxk10000.encrypted"
+        text = decryptFromFile(pwd, fname)
+        data = json.loads(text)
+        print(data)
+        bank = data['Bank-Acc']
+        ssn = data['Social-Security']
+        return redirect(url_for('new_password', bank = bank, ssn = ssn))
+    else:
+        try:
+            return render_template('password_change.html')
+        except Exception as e:
+            print("Error in callback function:", e)
+            return "An error occurred: {}".format(str(e))
 
+
+@app.route('/new_password', methods = ['GET', 'POST'])
+def new_password():
+    bank = request.args.get('bank')
+    ssn = request.args.get('ssn')
+    print("I'm here " +  bank + ", "+ ssn)
+    if request.method == 'POST':
+        pwd = request.form['new_password']
+        session['pwd_user'] = pwd
+        # fname = session['net_id'] + ".encrypted"
+        fname = "jxk10000.encrypted"
+        ptext = json.dumps({'Social-Security': ssn, 'Bank-Acc': bank})
+        encryptToFile(ptext, pwd, fname, tags = ['Social-Security', 'Bank-Acc'])
+        return redirect('/dash_board')
+    else:
+        try:
+            return render_template('new_password.html')
+        except Exception as e:
+            print("Error in callback function:", e)
+            return "An error occurred: {}".format(str(e))
 
 # @app.route('/password_change')
 # def password_change():

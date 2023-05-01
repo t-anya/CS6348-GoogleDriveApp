@@ -149,19 +149,46 @@ def generate_link_by_name(drive_service, folder_name):
         print(f'Could not find a folder with the name: {folder_name}')
         return None
     
-def read_file(drive_service, file_id):
-    request = drive_service.files().get_media(fileId=file_id)
-    file = io.BytesIO()
-    downloader = MediaIoBaseDownload(file, request)
+from googleapiclient.http import MediaIoBaseDownload
+
+def read_file(service, file_id, mimeType=None):
+    if not file_id:
+        print("File ID is None. Please check the file ID.")
+        return
+
+    file = service.files().get(fileId=file_id).execute()
+    if not mimeType:
+        mimeType = file.get('mimeType', 'text/plain')
+
+    if 'google-apps' in mimeType:
+        # Export Google Workspace file
+        if 'document' in mimeType:
+            export_mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        elif 'spreadsheet' in mimeType:
+            export_mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        elif 'presentation' in mimeType:
+            export_mimeType = 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+        else:
+            print('Unsupported Google Workspace file type')
+            return
+
+        request = service.files().export_media(fileId=file_id, mimeType=export_mimeType)
+    else:
+        request = service.files().get_media(fileId=file_id)
+
+    file_content = io.BytesIO()
+    downloader = MediaIoBaseDownload(file_content, request)
     done = False
-    '''
-    while done is False:
+    while not done:
         status, done = downloader.next_chunk()
-        print("Download %d%%." % int(status.progress() * 100))
-    '''
-    file.seek(0)
-    file_content = file.read().decode('utf-8')
-    return file_content
+        print(f'Download progress: {int(status.progress() * 100)}.')
+    file_content.seek(0)
+
+    if 'google-apps' in mimeType:
+        return file_content  # Returns the content as binary, you may need to convert it to the desired format
+    else:
+        return file_content.getvalue().decode('utf-8')  # Decode content to utf-8 for plain text files
+
 
 def rewrite_file(drive_service, file_id, new_content, mime_type='text/plain'):
     with tempfile.NamedTemporaryFile(mode='w+', delete=False) as temp_file:

@@ -1,3 +1,6 @@
+
+ 
+
 # example.py
 import os
 import pickle
@@ -72,8 +75,6 @@ drive_service = authenticate_google_drive()
 folder_name = "temple"
 folder_id = get_folder_id(drive_service, folder_name)
 file_name_to_read = "txs220004.encrypted"
-
-# Get the file ID
 file_id = get_file_id_by_name(drive_service, file_name_to_read, parent_id=folder_id)
 
 # Read the file content
@@ -81,7 +82,7 @@ file_content = read_file(drive_service, file_id)
 print("File content:", file_content)
 
 # rewrite the file content
-new_content = "hello world"
+new_content = "new hello world"
 rewrite_file(drive_service, file_id, new_content, mime_type='text/plain')
 print(read_file(drive_service, file_id))
     
