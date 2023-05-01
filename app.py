@@ -297,6 +297,18 @@ def create_new_file():
 
         return render_template('dash_board.html')
 
+@app.route('/decrypt', methods = ['POST', 'GET'])
+def decrypt():
+    if request.method == 'POST':
+        selection = request.form['decrypt']
+        print(selection)
+        return render_template('decrypted.html')
+    else:
+        return render_template('decrypt.html')
+
+@app.route('/decrypted', methods = ['POST', 'GET'])
+def decrypted():
+    return render_template('decrypted.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
