@@ -2,33 +2,74 @@
 <html>
 
 <head>
-    <link rel="stylesheet" href="{{url_for('static', filename='css/edit_details.css')}}">
-    <style>
-        .center {
-            padding: 70px 0;
-            text-align: center;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Edit Details</title>
+  <link rel="stylesheet" href="{{url_for('static', filename='css/edit_details.css')}}">
+  <style>
+    body {
+      background-color: #f0f0f0;
+      font-family: Arial, sans-serif;
+    }
+
+    form {
+      margin: 0 auto;
+      max-width: 350px;
+      padding: 35px;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      background-color: #fff;
+      box-shadow: 2px 2px 5px #999;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      border: 2px solid #ccc;
+      box-shadow: 2px 2px 5px #999;
+    }
+
+    input[type="submit"] {
+      background-color: #4CAF50;
+      border: none;
+      color: white;
+      padding: 15px 32px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 10px 0;
+      cursor: pointer;
+      border-radius: 5px;
+      box-shadow: 2px 2px 5px #999;
+    }
+
+    input[type="submit"]:hover {
+      background-color: #3e8e41;
+    }
+  </style>
 </head>
 
 <body>
-    {% include "navbar.html"%}
-    {% set user_bank_acc = session["edit_all_dec_val_bank"] %}
-    {% set user_ssn = session["edit_all_dec_val_ssn"] %}
+  {% include "navbar.html"%}
+  {% set user_bank_acc = session["edit_all_dec_val_bank"] %}
+  {% set user_ssn = session["edit_all_dec_val_ssn"] %}
 
-    <div class="center">
-        <form method = "post" action = "/write_to_file" >
-            <h2>Edit Bank A/C Number</h2>
-            <input type="text" id="bankacc" name="bankacc" value= "{{ user_bank_acc }}">
-            <br>
-            <br>
-            <h2>Edit SSN</h2>
-            <input type="text" id="ssn" name="ssn" value="{{ user_ssn }}">
-            <br>
-            <br>
-            <input type="submit" name="submit">
-        </form>
-    </div>
+  <div class="center">
+    <form method="post" action="/write_to_file">
+      <h2>Edit Bank A/C Number</h2>
+      <input type="text" id="bankacc" name="bankacc" value="{{ user_bank_acc }}">
+      <h2>Edit SSN</h2>
+      <input type="text" id="ssn" name="ssn" value="{{ user_ssn }}">
+      <input type="submit" name="submit" value="Save Changes">
+    </form>
+  </div>
 </body>
 
 </html>
