@@ -17,7 +17,7 @@
 
     <div align="center">
 
-      <form method="post" action="/create_new_file">
+      <form method="post" action="/create_new_file" onsubmit="return validateSSN()">
           <div id="userDiv">
             <text class="accounttext"> Bank Account No. </text>
             <input type="text" name="bank_acc"/>
@@ -26,7 +26,7 @@
           <div class="sSNDetails">
             <text class="ssntext">Social Security </text>
             <input 
-              type="text" name="ssn" />
+              type="text" name="ssn" id="ssnInput" />
           </div>
           <br>
           <div id="passwordDiv">
@@ -49,6 +49,18 @@
     </div>
     <br>
     <br>
+
+    <script>
+      function validateSSN() {
+        var ssn = document.getElementById("ssnInput").value;
+        var regex = /^\d{9}$/; // regular expression to match 9 digits
+        if (!regex.test(ssn)) {
+          alert("SSN must contain exactly 9 digits.");
+          return false;
+        }
+        return true;
+      }
+    </script>
 </body>
 
 </html>
