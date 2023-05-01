@@ -10,6 +10,10 @@ from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
 from googleapiclient.http import MediaIoBaseDownload
 
+
+
+
+
 def authenticate_google_drive():
     creds = None
     SCOPES = ['https://www.googleapis.com/auth/drive']
@@ -175,6 +179,23 @@ def read_file(service, file_id, mimeType=None):
         request = service.files().export_media(fileId=file_id, mimeType=export_mimeType)
     else:
         request = service.files().get_media(fileId=file_id)
+    
+    import io
+import json
+
+def read_file2(drive_service, file_id: str):
+    request = drive_service.files().get_media(fileId=file_id)
+    file_object = io.BytesIO()
+    downloader = MediaIoBaseDownload(file_object, request)
+    done = False
+    while done is False:
+        status, done = downloader.next_chunk()
+        print("Download %d%%." % int(status.progress() * 100))
+    
+    file_object.seek(0) # Reset the file pointer to the beginning
+    content = file_object.read()
+    decoded_content = content.decode('utf-8')
+    return json.loads(decoded_content)
 
     file_content = io.BytesIO()
     downloader = MediaIoBaseDownload(file_content, request)
