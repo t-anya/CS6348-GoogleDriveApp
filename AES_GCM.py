@@ -83,7 +83,9 @@ def decryptFromDriveFile(password, fileName,folder_name, tag=None):
     drive_service = authenticate_google_drive()
     folder_id = get_folder_id(drive_service, folder_name)
     file_id = get_file_id_by_name(drive_service, fileName, parent_id=folder_id)
+    file_content = read_file(drive_service, file_id)
     file_content = read_file2(drive_service, file_id)
+
 
     print(file_content)
     print(type(file_content))
