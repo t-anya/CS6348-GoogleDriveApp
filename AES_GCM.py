@@ -5,7 +5,7 @@ from Crypto.Random import get_random_bytes
 from Crypto.Util.Padding import pad, unpad
 from Crypto.Protocol.KDF import scrypt
 import json
-from GoogleDr_api import authenticate_google_drive, read_file, rewrite_file,get_file_id_by_name,get_folder_id
+from GoogleDr_api import authenticate_google_drive, read_file, read_file2, rewrite_file,get_file_id_by_name,get_folder_id
 
 def generateKey(password, salt):
     key = scrypt(password, salt, key_len = 32, N = 2**18, r = 8, p = 1)
@@ -83,7 +83,7 @@ def decryptFromDriveFile(password, fileName,folder_name, tag=None):
     drive_service = authenticate_google_drive()
     folder_id = get_folder_id(drive_service, folder_name)
     file_id = get_file_id_by_name(drive_service, fileName, parent_id=folder_id)
-    file_content = read_file(drive_service, file_id)
+    file_content = read_file2(drive_service, file_id)
 
     print(file_content)
     print(type(file_content))
