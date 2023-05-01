@@ -10,10 +10,6 @@ from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
 from googleapiclient.http import MediaIoBaseDownload
 
-
-
-
-
 def authenticate_google_drive():
     creds = None
     SCOPES = ['https://www.googleapis.com/auth/drive']

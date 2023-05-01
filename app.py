@@ -7,7 +7,7 @@ from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from pip._vendor import cachecontrol
 import google.auth.transport.requests
-from AES_GCM import decryptFromFile, encryptToFile
+from AES_GCM import decryptFromDriveFile, decryptFromFile, encryptDriveFile, encryptToFile
 from GoogleDr_api import authenticate_google_drive, change_permissions, create_file, create_folder
 
 # app = Flask(__name__)
@@ -190,9 +190,10 @@ def edit():
 @app.route('/edit_bank')
 def edit_bank():
     pwd = session["pwd_user"]
+    folder_name = session["net_id"]
     fname = session["net_id"] + ".encrypted"
 
-    dtext_all = decryptFromFile(pwd, fname)
+    dtext_all = decryptFromDriveFile(pwd, fname, folder_name)
 
     if dtext_all == -1:
         flash("Decryption failed: The encrypted file has been modified, or the password that you entered is incorrect.","info")            
@@ -210,9 +211,10 @@ def edit_bank():
 @app.route('/edit_ssn')
 def edit_ssn():
     pwd = session["pwd_user"]
+    folder_name = session["net_id"]
     fname = session["net_id"] + ".encrypted"
 
-    dtext_all = decryptFromFile(pwd, fname)
+    dtext_all = decryptFromDriveFile(pwd, fname, folder_name)
 
     if dtext_all == -1:
         flash("Decryption failed: The encrypted file has been modified, or the password that you entered is incorrect.","info")            
@@ -229,9 +231,10 @@ def edit_ssn():
 @app.route('/edit_all')
 def edit_all():
     pwd = session["pwd_user"]
+    folder_name = session["net_id"]
     fname = session["net_id"] + ".encrypted"
 
-    dtext_all = decryptFromFile(pwd, fname)
+    dtext_all = decryptFromDriveFile(pwd, fname, folder_name)
 
     if dtext_all == -1:
         flash("Decryption failed: The encrypted file has been modified, or the password that you entered is incorrect.","info")            
@@ -253,10 +256,11 @@ def write_to_file():
         ssn = request.form['ssn']
 
         pwd = session["pwd_user"]
+        folder_name = session["net_id"]
         fname = session["net_id"] + ".encrypted"
 
         ptext = json.dumps({"Social-Security": ssn, "Bank-Acc": bank_acc})
-        encryptToFile(ptext, pwd, fname, tags=["Social-Security", "Bank-Acc"])
+        encryptDriveFile(ptext, pwd, fname, folder_name, tags=["Social-Security", "Bank-Acc"])
         
         flash("File edited!", "info")
 
@@ -271,10 +275,11 @@ def write_to_file_ssn():
         ssn = request.form['ssn']
 
         pwd = session["pwd_user"]
+        folder_name = session["net_id"]
         fname = session["net_id"] + ".encrypted"
 
         ptext = json.dumps({"Social-Security": ssn, "Bank-Acc": bank_acc})
-        encryptToFile(ptext, pwd, fname, tags=["Social-Security", "Bank-Acc"])
+        encryptDriveFile(ptext, pwd, fname, folder_name, tags=["Social-Security", "Bank-Acc"])
         
         flash("File edited!", "info")
 
@@ -289,10 +294,11 @@ def write_to_file_bank():
         ssn = session["edit_all_dec_val_ssn"]
 
         pwd = session["pwd_user"]
+        folder_name = session["net_id"]
         fname = session["net_id"] + ".encrypted"
 
         ptext = json.dumps({"Social-Security": ssn, "Bank-Acc": bank_acc})
-        encryptToFile(ptext, pwd, fname, tags=["Social-Security", "Bank-Acc"])
+        encryptDriveFile(ptext, pwd, fname, folder_name, tags=["Social-Security", "Bank-Acc"])
         
         flash("File edited!", "info")
     return redirect('/dash_board')
@@ -318,7 +324,6 @@ def create_new_file():
         drive_service = authenticate_google_drive()
         folder_name = net_id
 
-        # todo - edge cases -> already present file
         folder_id = create_folder(drive_service, folder_name)
 
         local_file_name = fname
