@@ -10,6 +10,10 @@ from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
 from googleapiclient.http import MediaIoBaseDownload
 
+
+
+
+
 def authenticate_google_drive():
     creds = None
     SCOPES = ['https://www.googleapis.com/auth/drive']
@@ -200,6 +204,33 @@ def rewrite_file(drive_service, file_id, new_content, mime_type='text/plain'):
 
     os.unlink(temp_file.name)  # remove the temporary file
     print(f'File with ID "{file_id}" has been updated.')
+    
+def read_file2(drive_service, file_id):
+
+    # Get the access token from the drive service object
+    credentials = drive_service._http.credentials
+    access_token = credentials.token
+
+    # Set up the Docs API client
+    service = build('docs', 'v1', credentials=credentials)
+
+    # Use the Docs API to retrieve the document contents
+    document = service.documents().get(documentId=file_id).execute()
+
+    # Extract the text from the document
+    content = ""
+    for element in document.get("body").get("content"):
+        if "paragraph" in element:
+            for run in element.get("paragraph").get("elements"):
+                if "textRun" in run:
+                    content += run.get("textRun").get("content")
+    return content
+
+
+
+
+
+  
 
 
 
