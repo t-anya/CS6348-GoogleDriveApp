@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Enter Indexes to verify</title>
+    <style>
+      body {
+        background-color: #f0f0f0;
+        font-family: Arial, sans-serif;
+        text-align: center;
+      }
+      form {
+        display: inline-block;
+        margin-top: 50px;
+      }
+      label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: bold;
+      }
+      input[type="text"] {
+        width: 250px;
+        padding: 10px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+        border: 2px solid #ccc;
+        box-shadow: 2px 2px 5px #999;
+      }
+      input[type="submit"] {
+        background-color: #4CAF50;
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 10px;
+        cursor: pointer;
+        border-radius: 5px;
+        box-shadow: 2px 2px 5px #999;
+      }
+      input[type="submit"]:hover {
+        background-color: #3e8e41;
+      }
+    </style>
+  </head>
+  <body>
+	<h1>Enter Indexes and shares to verify</h1>
+	<form action="/decryptshare" method="post">
+		<label for="share1">Index and Share 1:</label>
+		<input type="text" id="share1_idx" name="share1_idx" placeholder="Enter index for share 1"><br>
+		<input type="text" id="share1_share" name="share1_share" placeholder="Enter share value for share 1"><br>
+		<label for="share2">Index and Share 2:</label>
+		<input type="text" id="share2_idx" name="share2_idx" placeholder="Enter index for share 2"><br>
+		<input type="text" id="share2_share" name="share2_share" placeholder="Enter share value for share 2"><br>
+		<input type="submit" value="Reconstruct Key and Decrypt">
+	</form>
+  <script>
+		const form = document.querySelector('form');
+
+		form.addEventListener('submit', (event) => {
+			const share1 = document.querySelector('#share1_share').value;
+			const share2 = document.querySelector('#share2_share').value;
+
+			if (!isValidHex(share1) || !isValidHex(share2)) {
+				event.preventDefault();
+				alert('Shares must be valid hexadecimal strings');
+			}
+		});
+
+		function isValidHex(str) {
+			return /^[0-9a-fA-F]+$/.test(str);
+		}
+	</script>
+</body>
+</html>
