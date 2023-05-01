@@ -5,6 +5,64 @@
     <meta charset="utf-8">
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/dash_board.css')}}">
     <title>Dash Board</title>
+    <style>
+        /* Styles for the body of the page */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+
+        /* Styles for the header */
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+        }
+
+        /* Styles for the main content area */
+        main {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Styles for the buttons */
+        .btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        /* Styles for the row of buttons */
+        .row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        /* Styles for the h3 element */
+        h3 {
+            text-align: center;
+        }
+
+        /* Styles for the div that aligns the content center */
+        .centered {
+            text-align: center;
+        }
+
+    </style>
 </head>
 
 <body>
@@ -14,13 +72,6 @@
     <div align="center">
 
         <h3>Dash Board</h3>
-        {% with messages = get_flashed_messages() %}
-        	{% if messages %}
-            	{% for msg in messages %}
-                	<h5>{{msg}}</h5>
-            	{% endfor %}
-        	{% endif %}
-        {% endwith %}
 
         <div class="row1 centered">
             <div>
@@ -46,12 +97,14 @@
                     <button class="btn">Encryption</button>              
             </div>
             <div>
-		    <a href="{{url_for('decrypt')}}">
-			<button class="btn">Decryption</button>
-		</a>
+                <a href="{{url_for('decrypt')}}"> 
+                    <button class="btn">Decryption</button>
+                </a>
               </div>
             <div>
-              <button class="btn">Secret Sharing</button>
+                <a href="{{url_for('secret_sharing')}}">
+                    <button class="btn">Secret Sharing</button>
+                </a>
             </div>
             <div>
                 
