@@ -96,14 +96,15 @@ def home():
 def home_net_id():
     if request.method == 'POST':
         net_id = request.form['net_id']
-        print(net_id)
+        session["net_id"] = net_id
+        print("XXX")
+        print(session["net_id"])
         return render_template('dash_board.html')
     else:
         return render_template('dash_board.html')
 
 
 @app.route('/dash_board', methods=['GET', 'POST'])
-# @login_required
 def dash_board():
     # todo
     if request.method == 'POST':
@@ -152,63 +153,66 @@ def pwd_edit_file():
 
 @app.route('/edit')
 def edit():
-    # todo
-    session["net_id"] = "jxk10000"
-    session["user_name"] = "Chase"
     return render_template('edit.html')
 
 
 @app.route('/edit_bank')
 def edit_bank():
-    # todo - pwd check
-    pwd = "SuperSecRetPassWord"
+    pwd = session["pwd_user"]
     fname = session["net_id"] + ".encrypted"
 
-    decryptedVal = decryptFromFile(pwd, fname, tag="Bank-Acc")
-    if decryptedVal == 0:
-        # todo -add flash support
-        flash("File is modified", "info")
-        return redirect('/')
+    dtext_all = decryptFromFile(pwd, fname)
+
+    if dtext_all == -1:
+        flash("Decryption failed: The encrypted file has been modified, or the password that you entered is incorrect.","info")            
+        return redirect('/dash_board')
+    elif dtext_all == -2:
+        flash("Tag not found in the decrypted data.","info")           
+        return redirect('/dash_board')
     else:
-        session["edit_all_dec_val_bank"] = decryptedVal[0]
-        session["edit_all_dec_val_ssn"] = decryptedVal[1]
+        dtext_all = json.loads(dtext_all)
+        session["edit_all_dec_val_bank"] = dtext_all["Bank-Acc"]
+        session["edit_all_dec_val_ssn"] = dtext_all["Social-Security"]
         return render_template('edit_bank_details.html')
 
 
 @app.route('/edit_ssn')
 def edit_ssn():
-    # todo - pwd check
-    pwd = "SuperSecRetPassWord"
-    uinfo = [session["user_name"], session["net_id"], pwd]
+    pwd = session["pwd_user"]
+    fname = session["net_id"] + ".encrypted"
 
-    decryptedVal = decryptAll(uinfo)
-    if decryptedVal == 0:
-        # todo -add flash support
-        flash("File is modified", "info")
-        return redirect('/')
+    dtext_all = decryptFromFile(pwd, fname)
+
+    if dtext_all == -1:
+        flash("Decryption failed: The encrypted file has been modified, or the password that you entered is incorrect.","info")            
+        return redirect('/dash_board')
+    elif dtext_all == -2:
+        flash("Tag not found in the decrypted data.","info")           
+        return redirect('/dash_board')
     else:
-        session["edit_all_dec_val_bank"] = decryptedVal[0]
-        session["edit_all_dec_val_ssn"] = decryptedVal[1]
+        dtext_all = json.loads(dtext_all)
+        session["edit_all_dec_val_bank"] = dtext_all["Bank-Acc"]
+        session["edit_all_dec_val_ssn"] = dtext_all["Social-Security"]
         return render_template('edit_ssn_details.html')
-
 
 @app.route('/edit_all')
 def edit_all():
     pwd = session["pwd_user"]
     fname = session["net_id"] + ".encrypted"
 
-    try:
-        dtext_all = decryptFromFile(pwd, fname)
+    dtext_all = decryptFromFile(pwd, fname)
+
+    if dtext_all == -1:
+        flash("Decryption failed: The encrypted file has been modified, or the password that you entered is incorrect.","info")            
+        return redirect('/dash_board')
+    elif dtext_all == -2:
+        flash("Tag not found in the decrypted data.","info")           
+        return redirect('/dash_board')
+    else:
         dtext_all = json.loads(dtext_all)
         session["edit_all_dec_val_bank"] = dtext_all["Bank-Acc"]
         session["edit_all_dec_val_ssn"] = dtext_all["Social-Security"]
         return render_template('edit_all_details.html')
-
-    except Exception as e :
-        #todo flash support
-        flash(e,"info")
-        return redirect('/dash_board')
-
 
 @app.route('/write_to_file',methods=['GET', 'POST'])
 def write_to_file():
@@ -232,13 +236,15 @@ def write_to_file():
 def write_to_file_ssn():
     if request.method == "POST":
 
+        bank_acc = session["edit_all_dec_val_bank"]
         ssn = request.form['ssn']
-        bdetails = [session["edit_all_dec_val_bank"], ssn]
 
-        pwd = "SuperSecRetPassWord"
-        uinfo = [session["user_name"], session["net_id"], pwd]
-        encryptToFile(uinfo, bdetails)
+        pwd = session["pwd_user"]
+        fname = session["net_id"] + ".encrypted"
 
+        ptext = json.dumps({"Social-Security": ssn, "Bank-Acc": bank_acc})
+        encryptToFile(ptext, pwd, fname, tags=["Social-Security", "Bank-Acc"])
+        
         flash("File edited!", "info")
 
     return redirect('/dash_board')
@@ -249,14 +255,15 @@ def write_to_file_bank():
     if request.method == "POST":
 
         bank_acc = request.form['bankacc']
-        bdetails = [bank_acc, session["edit_all_dec_val_ssn"]]
+        ssn = session["edit_all_dec_val_ssn"]
 
-        pwd = "SuperSecRetPassWord"
-        uinfo = [session["user_name"], session["net_id"], pwd]
-        encryptToFile(uinfo, bdetails)
+        pwd = session["pwd_user"]
+        fname = session["net_id"] + ".encrypted"
 
+        ptext = json.dumps({"Social-Security": ssn, "Bank-Acc": bank_acc})
+        encryptToFile(ptext, pwd, fname, tags=["Social-Security", "Bank-Acc"])
+        
         flash("File edited!", "info")
-
     return redirect('/dash_board')
 
 
@@ -266,19 +273,19 @@ def create_new_file():
         bank_acc = request.form['bank_acc']
         ssn = request.form['ssn']
         pwd = request.form['pwd']
-
-        # todo unname & netid
-        uinfo = ["Chase", "jxk10000", pwd]
+        
         bdetails = [bank_acc, ssn]
+        net_id = session["net_id"]
 
         ptext = json.dumps(
             {"Social-Security": bdetails[1], "Bank-Acc": bdetails[0]})
-        fname = uinfo[1] + ".encrypted"
+        fname = net_id + ".encrypted"
+        print(fname)
 
         encryptToFile(ptext, pwd, fname, tags=["Social-Security", "Bank-Acc"])
 
         drive_service = authenticate_google_drive()
-        folder_name = uinfo[1]
+        folder_name = net_id
 
         # todo - edge cases -> already present file
         folder_id = create_folder(drive_service, folder_name)
