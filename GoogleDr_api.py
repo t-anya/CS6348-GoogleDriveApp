@@ -179,23 +179,6 @@ def read_file(service, file_id, mimeType=None):
         request = service.files().export_media(fileId=file_id, mimeType=export_mimeType)
     else:
         request = service.files().get_media(fileId=file_id)
-    
-    import io
-import json
-
-def read_file2(drive_service, file_id: str):
-    request = drive_service.files().get_media(fileId=file_id)
-    file_object = io.BytesIO()
-    downloader = MediaIoBaseDownload(file_object, request)
-    done = False
-    while done is False:
-        status, done = downloader.next_chunk()
-        print("Download %d%%." % int(status.progress() * 100))
-    
-    file_object.seek(0) # Reset the file pointer to the beginning
-    content = file_object.read()
-    decoded_content = content.decode('utf-8')
-    return json.loads(decoded_content)
 
     file_content = io.BytesIO()
     downloader = MediaIoBaseDownload(file_content, request)
@@ -221,6 +204,33 @@ def rewrite_file(drive_service, file_id, new_content, mime_type='text/plain'):
 
     os.unlink(temp_file.name)  # remove the temporary file
     print(f'File with ID "{file_id}" has been updated.')
+    
+def read_file2(drive_service, file_id):
+
+    # Get the access token from the drive service object
+    credentials = drive_service._http.credentials
+    access_token = credentials.token
+
+    # Set up the Docs API client
+    service = build('docs', 'v1', credentials=credentials)
+
+    # Use the Docs API to retrieve the document contents
+    document = service.documents().get(documentId=file_id).execute()
+
+    # Extract the text from the document
+    content = ""
+    for element in document.get("body").get("content"):
+        if "paragraph" in element:
+            for run in element.get("paragraph").get("elements"):
+                if "textRun" in run:
+                    content += run.get("textRun").get("content")
+    return content
+
+
+
+
+
+  
 
 
 
