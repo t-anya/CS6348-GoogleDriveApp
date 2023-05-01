@@ -360,5 +360,13 @@ def decrypted():
     print(data)
     return render_template('decrypted.html', data = data)
 
+@app.route('/secret_sharing')
+def secret_sharing():
+    return render_template('secret_sharing.html')
+
+@app.route('/enter')
+def enter():
+    return render_template('enter.html')
+
 if __name__ == '__main__':
     app.run(debug=True)
