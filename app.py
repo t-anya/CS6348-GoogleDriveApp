@@ -342,10 +342,9 @@ def create_new_file():
 
 @app.route('/decrypt', methods = ['POST', 'GET'])
 def decrypt():
-    # pwd = session['pwd_user']
-    # fname = session['net_id']
-    pwd = "SuperSecRetPassWord"
-    fname = "jxk10000.encrypted"
+    pwd = session['pwd_user']
+    fname = session['net_id']
+
     if request.method == 'POST':
         selection = request.form['decrypt']
         if selection == "ssn":
