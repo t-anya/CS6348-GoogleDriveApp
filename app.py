@@ -2,7 +2,7 @@ import json
 import os
 import pathlib
 import requests
-from flask import Flask, session, abort, redirect, request, render_template, flash
+from flask import Flask, session, abort, redirect, request, render_template, flash, url_for
 from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from pip._vendor import cachecontrol
@@ -306,16 +306,28 @@ def create_new_file():
 
 @app.route('/decrypt', methods = ['POST', 'GET'])
 def decrypt():
+    # pwd = session['pwd_user']
+    # fname = session['net_id']
+    pwd = "SuperSecRetPassWord"
+    fname = "jxk10000.encrypted"
     if request.method == 'POST':
         selection = request.form['decrypt']
-        print(selection)
-        return render_template('decrypted.html')
+        if selection == "ssn":
+            data = decryptFromFile(pwd, fname, tag = 'Social-Security')
+        elif selection == "bank":
+            data = decryptFromFile(pwd, fname, tag = 'Bank')
+        else:
+            data = decryptFromFile(pwd, fname)
+            data = "Social-Security: " + str(data[0]) + "Bank Acc: " + str(data[1])
+        return redirect(url_for('decrypted', data = data))
     else:
         return render_template('decrypt.html')
 
 @app.route('/decrypted', methods = ['POST', 'GET'])
 def decrypted():
-    return render_template('decrypted.html')
+    data = request.args.get('data')
+    print(data)
+    return render_template('decrypted.html', data = data)
 
 if __name__ == '__main__':
     app.run(debug=True)
