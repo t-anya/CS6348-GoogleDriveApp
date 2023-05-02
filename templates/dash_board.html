@@ -73,6 +73,15 @@
 
         <h3>Dash Board</h3>
 
+        {% with messages = get_flashed_messages() %}
+        	{% if messages %}
+            	{% for msg in messages %}
+                	<h5>{{msg}}</h5>
+            	{% endfor %}
+        	{% endif %}
+        {% endwith %}
+
+
         <div class="row1 centered">
             <div>
                 <a href="{{url_for('new_details')}}">
