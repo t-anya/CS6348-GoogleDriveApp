@@ -18,4 +18,4 @@ Website
 Once the code is compiled and run, a link to the website will appear on the terminal.
 
 Implemented By
-Tanya, Thilak, Ashray, Kruti and Roshan
+Tanya, Thilak, Xiangheng, Ashray, Kruti and Roshan
