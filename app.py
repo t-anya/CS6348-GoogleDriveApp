@@ -2,7 +2,7 @@ import json
 import os
 import pathlib
 import requests
-from flask import Flask, session, abort, redirect, request, render_template, flash, url_for
+from flask import Flask, session, abort, redirect, request, render_template, flash, url_for, send_file
 from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from pip._vendor import cachecontrol
@@ -404,6 +404,15 @@ def decryptshare():
             flash("An error occured", "error")
             return redirect('/dash_board')
         
+@app.route('/password_share', methods = ['POST', 'GET'])
+def password_share():
+    if request.method == "POST":
+        pwd = request.form['password']
+        session['pwd'] = pwd
+        return redirect(url_for('secret_sharing'))
+    else:
+        return render_template('password_share.html')
+
 @app.route('/generate', methods=['POST','GET'])
 def generate():
     # Generate a random key
@@ -418,9 +427,17 @@ def generate():
         share_dict = {'idx': idx, 'value': share.hex()}
         share_list.append(share_dict)
 
+    folder_name = session["net_id"]
+    fname = session["net_id"] + ".encrypted"
+
+    dtext_all = decryptFromDriveFile(session['pwd'], fname, folder_name)
+    dtext_all = json.loads(dtext_all)
+
+    with open(fname, 'w') as f:
+        json.dump(dtext_all, f)
+
     # Encrypt the file using the key
-    encrypted_file_name = session["net_id"] + ".encrypted"
-    with open(encrypted_file_name, "rb") as fi, open("sdec.txt", "wb") as fo:
+    with open(fname, "rb") as fi, open("sdec.txt", "wb") as fo:
         cipher = AES.new(key, AES.MODE_EAX)
         ct, tag = cipher.encrypt(fi.read()), cipher.digest()
         fo.write(cipher.nonce + tag + ct)
