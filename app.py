@@ -131,16 +131,24 @@ def new_details():
 @app.route('/password_change', methods = ['GET', 'POST'])
 def password_change():
     if request.method == 'POST':
-        pwd = request.form['old_password']
-        session['pwd_user'] = pwd
-        # fname = session["net_id"] + ".encrypted"
-        fname = "jxk10000.encrypted"
-        text = decryptFromFile(pwd, fname)
-        data = json.loads(text)
-        print(data)
-        bank = data['Bank-Acc']
-        ssn = data['Social-Security']
-        return redirect(url_for('new_password', bank = bank, ssn = ssn))
+        pwd = request.form['pwd']
+        folder_name = session["net_id"]
+        fname = session["net_id"] + ".encrypted"
+        dtext_all = decryptFromDriveFile(pwd, fname,folder_name)
+
+        if dtext_all == -1:
+            flash("Decryption failed: The encrypted file has been modified, or the password that you entered is incorrect.","info")            
+            return redirect('/dash_board')
+        elif dtext_all == -2:
+            flash("Tag not found in the decrypted data.","info")           
+            return redirect('/dash_board')
+        else:
+            dtext_all = json.loads(dtext_all)
+            print("Successful")
+            print(dtext_all)
+            session["edit_all_dec_val_bank"] = dtext_all["Bank-Acc"]
+            session["edit_all_dec_val_ssn"] = dtext_all["Social-Security"]
+            return render_template('new_password.html')
     else:
         try:
             return render_template('password_change.html')
@@ -151,16 +159,14 @@ def password_change():
 
 @app.route('/new_password', methods = ['GET', 'POST'])
 def new_password():
-    bank = request.args.get('bank')
-    ssn = request.args.get('ssn')
-    print("I'm here " +  bank + ", "+ ssn)
     if request.method == 'POST':
         pwd = request.form['new_password']
         session['pwd_user'] = pwd
-        # fname = session['net_id'] + ".encrypted"
-        fname = "jxk10000.encrypted"
-        ptext = json.dumps({'Social-Security': ssn, 'Bank-Acc': bank})
-        encryptToFile(ptext, pwd, fname, tags = ['Social-Security', 'Bank-Acc'])
+        folder_name = session["net_id"]
+        fname = session["net_id"] + ".encrypted"
+        ptext = json.dumps({'Social-Security': session["edit_all_dec_val_ssn"], 'Bank-Acc': session["edit_all_dec_val_bank"]})
+        encryptDriveFile(ptext, pwd, fname,folder_name,  tags = ['Social-Security', 'Bank-Acc'])
+        flash("Changed Password!")
         return redirect('/dash_board')
     else:
         try:
@@ -169,10 +175,6 @@ def new_password():
             print("Error in callback function:", e)
             return "An error occurred: {}".format(str(e))
 
-# @app.route('/password_change')
-# def password_change():
-#     # todo
-#     return render_template('password_change.html')
 
 @app.route('/modify')
 def modify():
