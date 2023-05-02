@@ -350,17 +350,36 @@ def create_new_file():
 def decrypt():
     pwd = session['pwd_user']
     fname = session['net_id']
+    folder_name = session["net_id"]
+    fname = session["net_id"] + ".encrypted"
 
     if request.method == 'POST':
         selection = request.form['decrypt']
         if selection == "ssn":
-            data = decryptFromFile(pwd, fname, tag = 'Social-Security')
+            data = decryptFromDriveFile(pwd, fname,folder_name, tag = 'Social-Security')
         elif selection == "bank":
-            data = decryptFromFile(pwd, fname, tag = 'Bank')
+            data = decryptFromDriveFile(pwd, fname,folder_name, tag = 'Bank-Acc')
         else:
-            data = decryptFromFile(pwd, fname)
-            data = "Social-Security: " + str(data[0]) + "Bank Acc: " + str(data[1])
-        return redirect(url_for('decrypted', data = data))
+            data = decryptFromDriveFile(pwd, fname,folder_name)
+
+        if data == -1:
+            flash("Decryption failed: The encrypted file has been modified, or the password that you entered is incorrect.","info")            
+            return redirect('/dash_board')
+        elif data == -2:
+            flash("Tag not found in the decrypted data.","info")           
+            return redirect('/dash_board')
+        else:
+            if selection == "ssn":
+                result = "SSN " + data
+            elif selection == "bank":
+                result = "Bank Info" + data
+            else:
+                dtext_all = json.loads(data)
+                bank = dtext_all["Bank-Acc"]
+                ssn = dtext_all["Social-Security"]
+                result = "SSN " + ssn + ", Bank Info " + bank
+            session["decrypted_data"] = result        
+        return redirect(url_for('decrypted', data = result))
     else:
         return render_template('decrypt.html')
 
