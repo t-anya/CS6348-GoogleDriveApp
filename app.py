@@ -418,8 +418,8 @@ def generate():
         share_list.append(share_dict)
 
     # Encrypt the file using the key
-    with open("upload.txt", "rb") as fi, open("sdec.txt", "wb") as fo:
-        # todo: Add file path instead of harcoding the file name
+    encrypted_file_name = session["net_id"] + ".encrypted"
+    with open(encrypted_file_name, "rb") as fi, open("sdec.txt", "wb") as fo:
         cipher = AES.new(key, AES.MODE_EAX)
         ct, tag = cipher.encrypt(fi.read()), cipher.digest()
         fo.write(cipher.nonce + tag + ct)
